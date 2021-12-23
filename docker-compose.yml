@@ -1,0 +1,44 @@
+version: '3.4'
+
+services:
+  portainer:
+    container_name: portainer
+    image: portainer/portainer:linux-arm
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    ports:
+      - 9000:9000
+      - 8000:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+  rpi-monitor:
+    container_name: rpi-monitor
+    image: michaelmiklis/rpi-monitor:latest
+    ports:
+        - "8888:8888"
+    devices:
+        - /dev/vcsm-cma
+    volumes:
+        - /opt/vc:/opt/vc
+        - /boot:/boot
+        - /sys:/dockerhost/sys:ro
+        - /etc:/dockerhost/etc:ro
+        - /proc:/dockerhost/proc:ro
+        - /usr/lib:/dockerhost/usr/lib:ro
+  homebridge:
+    image: oznu/homebridge:latest
+    container_name: homebridge
+    restart: always
+    network_mode: host
+    environment:
+      - US=America/New_York
+      - PGID=1000
+      - PUID=1000
+      - HOMEBRIDGE_CONFIG_UI=1
+      - HOMEBRIDGE_CONFIG_UI_PORT=8581
+    volumes:
+      - ./homebridge:/homebridge
+
+volumes:
+    portainer_data:    
